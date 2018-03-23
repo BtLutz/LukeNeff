@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LukeNeff</string>
+    <string name="take_photo_button">Take Photo</string>
 </resources>
