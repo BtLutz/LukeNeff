@@ -3,7 +3,9 @@ package intelligentdesign.android.lukeneff;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.graphics.Camera;
+import android.graphics.Picture;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -28,8 +30,11 @@ import java.util.List;
 public class MainFragment extends Fragment {
 
     private static final int REQUEST_PHOTO = 2;
+    private static final int REQUEST_DETECTION = 3;
     private static final String FILE_PROVIDER =
             "com.intelligentdesign.lukeneff.fileprovider";
+    private static final String EXTRA_FILE_URI = "com.intelligentdesign.lukeneff.file_uri";
+
     private ImageView mPhotoTaken;
     private Button mTakePhotoButton;
     private File mPhotoFile;
@@ -72,6 +77,29 @@ public class MainFragment extends Fragment {
                 startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
+
+        updatePhotoView();
         return v;
+    }
+
+    public void updatePhotoView() {
+        if (mPhotoTaken == null || !mPhotoFile.exists()) {
+            // do nothing!
+        } else {
+            Bitmap bitmap = PictureUtilities.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+            mPhotoTaken.setImageBitmap(bitmap);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_PHOTO) {
+            Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
+            getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            updatePhotoView();
+            Intent i = new Intent(getContext(), TestActivity.class); // Modify activity name here
+            i.putExtra(EXTRA_FILE_URI, uri);
+            startActivityForResult(i, REQUEST_DETECTION);
+        }
     }
 }
