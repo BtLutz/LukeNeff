@@ -88,6 +88,7 @@ public class MainFragment extends Fragment {
         } else {
             Bitmap bitmap = PictureUtilities.getScaledBitmap(mPhotoFile.getPath(), getActivity());
             mPhotoTaken.setImageBitmap(bitmap);
+
         }
     }
 
@@ -97,7 +98,7 @@ public class MainFragment extends Fragment {
             Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
             getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             updatePhotoView();
-            Intent i = new Intent(getContext(), TestActivity.class); // Modify activity name here
+            Intent i = new Intent(getContext(), FaceEvaluateActivity.class); // Modify activity name here
             i.putExtra(EXTRA_FILE_URI, uri);
             startActivityForResult(i, REQUEST_DETECTION);
         }
