@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "662273052721",
+    "firebase_url": "https://lukeneff-45f43.firebaseio.com",
+    "project_id": "lukeneff-45f43",
+    "storage_bucket": "lukeneff-45f43.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662273052721:android:f313f71bcca5ad13",
+        "android_client_info": {
+          "package_name": "intelligentdesign.android.lukeneff"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "662273052721-g6dq7pooh3r5k87f46v7a985c7isdvim.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPJYYFor0JVb2VUZoyJdOJQNkuuvXE3ic"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
