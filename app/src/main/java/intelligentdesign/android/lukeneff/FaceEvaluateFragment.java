@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
@@ -26,6 +27,10 @@ import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import static com.google.android.gms.vision.face.FaceDetector.ALL_CLASSIFICATIONS;
+import static com.google.android.gms.vision.face.FaceDetector.ALL_LANDMARKS;
+import static com.google.android.gms.vision.face.FaceDetector.NO_LANDMARKS;
 
 
 /**
@@ -48,6 +53,7 @@ public class FaceEvaluateFragment extends Fragment {
     private String mParam2;
     private Bitmap baseImage;
     private OnFragmentInteractionListener mListener;
+    private TextView mTextView;
 
     public FaceEvaluateFragment() {
         // Required empty public constructor
@@ -90,10 +96,12 @@ public class FaceEvaluateFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_face_evaluate, container, false);
+        mTextView = (TextView) v.findViewById(R.id.happy);
         mImageView = (ImageView) v.findViewById(R.id.imageView2);
+        //pull the bitmap(uri) from the intent that started this activity
         Intent photoIntent = getActivity().getIntent();
         Uri uri = photoIntent.getParcelableExtra(EXTRA_FILE_URI);
-
+        //try to grab the bitmap from the URI
         try {
             baseImage = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
             mImageView.setImageBitmap(baseImage);
@@ -103,6 +111,7 @@ public class FaceEvaluateFragment extends Fragment {
             Log.e("CHECK", "File not found");
 
         }
+        //set up an object that can draw on the bitmap, indicating a face was detected
         Paint myRectPaint = new Paint();
         myRectPaint.setStrokeWidth(5);
         myRectPaint.setColor(Color.GREEN);
@@ -110,13 +119,20 @@ public class FaceEvaluateFragment extends Fragment {
         Bitmap holdCanvas = Bitmap.createBitmap(baseImage.getWidth(),baseImage.getHeight(),Bitmap.Config.RGB_565);
         Canvas drawOn = new Canvas(holdCanvas);
         drawOn.drawBitmap(baseImage, 0, 0, null);
+
+        //Build the face detector.
+        //Note that having landmarks enabled and classifications enabled is required to evaluate smiling probability, the key to happiness detection
         FaceDetector faceDetector = new
-                FaceDetector.Builder(this.getActivity()).setTrackingEnabled(false)
+                FaceDetector.Builder(getActivity()).setTrackingEnabled(false).setClassificationType(ALL_CLASSIFICATIONS).setLandmarkType(ALL_LANDMARKS)
                 .build();
+        //pop if broken face detector
         if(!faceDetector.isOperational()){
             new AlertDialog.Builder(v.getContext()).setMessage("Could not set up the face detector!").show();
 
         }
+        //Evaluate the array of faces returned from the face detector.
+
+        //This application is focused on one face, but can detect multiple. The last face detected will be the marker for happiness level
         Frame frame = new Frame.Builder().setBitmap(baseImage).build();
         SparseArray<Face> faces = faceDetector.detect(frame);
         for(int i=0; i<faces.size(); i++) {
@@ -126,6 +142,11 @@ public class FaceEvaluateFragment extends Fragment {
             float x2 = x1 + thisFace.getWidth();
             float y2 = y1 + thisFace.getHeight();
             drawOn.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
+
+            float happiness = thisFace.getIsSmilingProbability();
+            String hold = "Happiness Level: ";
+            mTextView.setText(hold +String.valueOf(happiness));
+
         }
         mImageView.setImageDrawable(new BitmapDrawable(getActivity().getResources(), holdCanvas));
         if(baseImage!=null)
@@ -135,7 +156,7 @@ public class FaceEvaluateFragment extends Fragment {
 
 
 
-
+        //return the inflated view
         return v;
     }
 
