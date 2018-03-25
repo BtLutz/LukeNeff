@@ -1,17 +1,28 @@
 package intelligentdesign.android.lukeneff;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,7 +46,7 @@ public class FaceEvaluateFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
+    private Bitmap baseImage;
     private OnFragmentInteractionListener mListener;
 
     public FaceEvaluateFragment() {
@@ -82,16 +93,49 @@ public class FaceEvaluateFragment extends Fragment {
         mImageView = (ImageView) v.findViewById(R.id.imageView2);
         Intent photoIntent = getActivity().getIntent();
         Uri uri = photoIntent.getParcelableExtra(EXTRA_FILE_URI);
+
         try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-            mImageView.setImageBitmap(bitmap);
+            baseImage = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+            mImageView.setImageBitmap(baseImage);
         }
-        catch(IOException e)
-        {
+        catch(IOException e) {
             e.printStackTrace();
-            Log.e("CHECK","File not found");
+            Log.e("CHECK", "File not found");
 
         }
+        Paint myRectPaint = new Paint();
+        myRectPaint.setStrokeWidth(5);
+        myRectPaint.setColor(Color.GREEN);
+        myRectPaint.setStyle(Paint.Style.STROKE);
+        Bitmap holdCanvas = Bitmap.createBitmap(baseImage.getWidth(),baseImage.getHeight(),Bitmap.Config.RGB_565);
+        Canvas drawOn = new Canvas(holdCanvas);
+        drawOn.drawBitmap(baseImage, 0, 0, null);
+        FaceDetector faceDetector = new
+                FaceDetector.Builder(this.getActivity()).setTrackingEnabled(false)
+                .build();
+        if(!faceDetector.isOperational()){
+            new AlertDialog.Builder(v.getContext()).setMessage("Could not set up the face detector!").show();
+
+        }
+        Frame frame = new Frame.Builder().setBitmap(baseImage).build();
+        SparseArray<Face> faces = faceDetector.detect(frame);
+        for(int i=0; i<faces.size(); i++) {
+            Face thisFace = faces.valueAt(i);
+            float x1 = thisFace.getPosition().x;
+            float y1 = thisFace.getPosition().y;
+            float x2 = x1 + thisFace.getWidth();
+            float y2 = y1 + thisFace.getHeight();
+            drawOn.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
+        }
+        mImageView.setImageDrawable(new BitmapDrawable(getActivity().getResources(), holdCanvas));
+        if(baseImage!=null)
+        {
+
+        }
+
+
+
+
         return v;
     }
 
