@@ -9,7 +9,6 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -30,5 +29,4 @@ dependencies {
 
     //Added for Mobile Vision
     compile 'com.google.android.gms:play-services-vision:12.0.0'
-    compile 'com.google.android.gms:play-services:12.0.0'
 }
