@@ -66,6 +66,8 @@ public class MainFragment extends Fragment {
                 captureImage.resolveActivity(packageManager) != null;
         mTakePhotoButton.setEnabled(canTakePhoto);
 
+        /* Setting OnClickListeners */
+        // Take Photo Button
         mTakePhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,15 +86,25 @@ public class MainFragment extends Fragment {
                 startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
-
+        // Log Out Button
         mLogOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(getContext(), SignInActivity.class);
                 startActivity(intent);
+                getActivity().finish();
             }
         });
+        // View History Button
+        mViewHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), GraphActivity.class);
+                startActivity(intent);
+            }
+        });
+
         updatePhotoView();
         return v;
     }
