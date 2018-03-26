@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">LukeNeff</string>
     <string name="take_photo_button">Take Photo</string>
+    <string name="log_out_text">log Out</string>
+    <string name="view_history_text">View History</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

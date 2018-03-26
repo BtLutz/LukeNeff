@@ -1,5 +1,6 @@
 package intelligentdesign.android.lukeneff;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.google.android.gms.vision.CameraSource;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
 import java.util.List;
@@ -37,6 +39,8 @@ public class MainFragment extends Fragment {
 
     private ImageView mPhotoTaken;
     private Button mTakePhotoButton;
+    private Button mLogOutButton;
+    private Button mViewHistoryButton;
     private File mPhotoFile;
 
     /* Control Flow:
@@ -47,8 +51,11 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
+
         mPhotoTaken = (ImageView) v.findViewById(R.id.photo_taken);
         mTakePhotoButton = (Button) v.findViewById(R.id.take_photo_button);
+        mLogOutButton = (Button) v.findViewById(R.id.log_out);
+        mViewHistoryButton = (Button) v.findViewById(R.id.view_history);
         mPhotoFile = PhotoLab.get(getContext()).getPhotoFile();
 
         PackageManager packageManager = getContext().getPackageManager();
@@ -78,6 +85,14 @@ public class MainFragment extends Fragment {
             }
         });
 
+        mLogOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(getContext(), SignInActivity.class);
+                startActivity(intent);
+            }
+        });
         updatePhotoView();
         return v;
     }
@@ -88,7 +103,6 @@ public class MainFragment extends Fragment {
         } else {
             Bitmap bitmap = PictureUtilities.getScaledBitmap(mPhotoFile.getPath(), getActivity());
             mPhotoTaken.setImageBitmap(bitmap);
-
         }
     }
 
