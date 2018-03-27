@@ -37,7 +37,7 @@ public class MainFragment extends Fragment {
             "com.intelligentdesign.lukeneff.fileprovider";
     private static final String EXTRA_FILE_URI = "com.intelligentdesign.lukeneff.file_uri";
 
-    private ImageView mPhotoTaken;
+//    private ImageView mPhotoTaken;
     private Button mTakePhotoButton;
     private Button mLogOutButton;
     private Button mViewHistoryButton;
@@ -52,7 +52,7 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mPhotoTaken = (ImageView) v.findViewById(R.id.photo_taken);
+//        mPhotoTaken = (ImageView) v.findViewById(R.id.photo_taken);
         mTakePhotoButton = (Button) v.findViewById(R.id.take_photo_button);
         mLogOutButton = (Button) v.findViewById(R.id.log_out);
         mViewHistoryButton = (Button) v.findViewById(R.id.view_history);
@@ -105,25 +105,25 @@ public class MainFragment extends Fragment {
             }
         });
 
-        updatePhotoView();
+//        updatePhotoView();
         return v;
     }
 
-    public void updatePhotoView() {
-        if (mPhotoTaken == null || !mPhotoFile.exists()) {
-            // do nothing!
-        } else {
-            Bitmap bitmap = PictureUtilities.getScaledBitmap(mPhotoFile.getPath(), getActivity());
-            mPhotoTaken.setImageBitmap(bitmap);
-        }
-    }
+//    public void updatePhotoView() {
+//        if (mPhotoTaken == null || !mPhotoFile.exists()) {
+//            // do nothing!
+//        } else {
+//            Bitmap bitmap = PictureUtilities.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+//            mPhotoTaken.setImageBitmap(bitmap);
+//        }
+//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_PHOTO) {
             Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
             getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            updatePhotoView();
+//            updatePhotoView();
             Intent i = new Intent(getContext(), FaceEvaluateActivity.class); // Modify activity name here
             i.putExtra(EXTRA_FILE_URI, uri);
             startActivityForResult(i, REQUEST_DETECTION);
