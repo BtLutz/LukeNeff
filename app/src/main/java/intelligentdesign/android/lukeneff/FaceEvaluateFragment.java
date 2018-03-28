@@ -1,7 +1,6 @@
 package intelligentdesign.android.lukeneff;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -24,13 +23,19 @@ import android.widget.TextView;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.android.gms.vision.face.FaceDetector.ALL_CLASSIFICATIONS;
 import static com.google.android.gms.vision.face.FaceDetector.ALL_LANDMARKS;
-import static com.google.android.gms.vision.face.FaceDetector.NO_LANDMARKS;
 
 
 /**
@@ -48,20 +53,18 @@ public class FaceEvaluateFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private static final String EXTRA_FILE_URI = "com.intelligentdesign.lukeneff.file_uri";
     private ImageView mImageView;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
     private Bitmap baseImage;
     private OnFragmentInteractionListener mListener;
     private TextView mTextView;
+    private DatabaseReference mDatabaseReference;
 
     public FaceEvaluateFragment() {
         // Required empty public constructor
-
-
-
-
-
     }
 
     /**
@@ -98,6 +101,7 @@ public class FaceEvaluateFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_face_evaluate, container, false);
         mTextView = (TextView) v.findViewById(R.id.happy);
         mImageView = (ImageView) v.findViewById(R.id.imageView2);
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         //pull the bitmap(uri) from the intent that started this activity
         Intent photoIntent = getActivity().getIntent();
         Uri uri = photoIntent.getParcelableExtra(EXTRA_FILE_URI);
@@ -146,20 +150,35 @@ public class FaceEvaluateFragment extends Fragment {
             float happiness = thisFace.getIsSmilingProbability();
             String hold = "Happiness Level: ";
             mTextView.setText(hold +String.valueOf(happiness));
-
         }
+        // Casting twice so that the parameter is right before we send it to the method.
+        writeHappinessToDatabase(Double.valueOf(String.valueOf(mTextView.getText())));
         mImageView.setImageDrawable(new BitmapDrawable(getActivity().getResources(), holdCanvas));
         if(baseImage!=null)
         {
 
         }
-
-
-
         //return the inflated view
         return v;
     }
 
+    private void writeHappinessToDatabase(double happiness) {
+        // Setup
+        Date date = new Date();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String key = mDatabaseReference.child("data-points").push().getKey();
+
+        // Building the new DataPoint object for FireBase
+        FireBaseDataPoint fBDataPoint = new FireBaseDataPoint(date, happiness);
+        Map<String, Object> dataPointValues = fBDataPoint.toMap();
+
+        // How we'll be putting stuff into the database. This object shows the path for where
+        // our new object should be inserted.
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put("/data-points/" + user.getUid() + "/" + key, dataPointValues);
+        mDatabaseReference.updateChildren(childUpdates);
+
+    }
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
