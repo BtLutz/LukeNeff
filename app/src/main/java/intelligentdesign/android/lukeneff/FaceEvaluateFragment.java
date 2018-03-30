@@ -150,9 +150,12 @@ public class FaceEvaluateFragment extends Fragment {
             float happiness = thisFace.getIsSmilingProbability();
             String hold = "Happiness Level: ";
             mTextView.setText(hold +String.valueOf(happiness));
+
+            //Send new happiness data to Firebase
+            writeHappinessToDatabase((double)happiness);
         }
         // Casting twice so that the parameter is right before we send it to the method.
-        writeHappinessToDatabase(Double.valueOf(String.valueOf(mTextView.getText())));
+        //writeHappinessToDatabase(Double.valueOf(String.valueOf(mTextView.getText())));
         mImageView.setImageDrawable(new BitmapDrawable(getActivity().getResources(), holdCanvas));
         if(baseImage!=null)
         {
@@ -164,21 +167,21 @@ public class FaceEvaluateFragment extends Fragment {
 
     private void writeHappinessToDatabase(double happiness) {
         // Setup
-        Date date = new Date();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String key = mDatabaseReference.child("data-points").push().getKey();
+        String key = mDatabaseReference.child("data-point").push().getKey();
 
         // Building the new DataPoint object for FireBase
-        FireBaseDataPoint fBDataPoint = new FireBaseDataPoint(date, happiness);
+        FireBaseDataPoint fBDataPoint = new FireBaseDataPoint(happiness);
         Map<String, Object> dataPointValues = fBDataPoint.toMap();
 
         // How we'll be putting stuff into the database. This object shows the path for where
         // our new object should be inserted.
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/data-points/" + user.getUid() + "/" + key, dataPointValues);
+        childUpdates.put("/users/" + user.getUid() + "/data-points/" + key, dataPointValues);
         mDatabaseReference.updateChildren(childUpdates);
 
     }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {

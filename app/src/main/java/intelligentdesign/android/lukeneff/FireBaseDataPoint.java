@@ -3,6 +3,7 @@ package intelligentdesign.android.lukeneff;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,24 +12,24 @@ import java.util.Map;
  * Created by brianlutz on 3/27/18.
  */
 
-public class FireBaseDataPoint implements DataPointInterface {
+public class FireBaseDataPoint {
 
-    private double x;
+    private String x;
     private double y;
 
-    public FireBaseDataPoint(Date x, double y) {
-        this.x = x.getTime();
+    public FireBaseDataPoint () {
+        //For DataSnapshot
+    }
+
+    public FireBaseDataPoint(double y) {
+        this.x = getDate();
         this.y = y;
     }
 
-    @Override
-    public double getX() {
-        return x;
-    }
-
-    @Override
-    public double getY() {
-        return y;
+    private String getDate() {
+        Calendar calendar = Calendar.getInstance();
+        Date now = calendar.getTime();
+        return now.toString();
     }
 
     public Map<String, Object> toMap() {
