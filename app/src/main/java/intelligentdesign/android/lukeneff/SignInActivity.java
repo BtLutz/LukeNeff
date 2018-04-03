@@ -119,7 +119,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         String username = usernameFromEmail(user.getEmail());
 
         // Write new user
-        writeNewUser(user.getUid(), username, user.getEmail());
+        //writeNewUser(user.getUid(), username, user.getEmail());
 
         // Go to MainActivity
         startActivity(new Intent(SignInActivity.this, MainActivity.class));
