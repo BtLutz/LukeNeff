@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +22,19 @@ import android.widget.ImageView;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,6 +54,10 @@ public class MainFragment extends Fragment {
     private Button mLogOutButton;
     private Button mViewHistoryButton;
     private File mPhotoFile;
+    private DatabaseReference mDatabase;
+    private FirebaseUser mUser;
+    private GraphView mGraphView;
+    private LineGraphSeries<DataPoint> mSeries;
 
     /* Control Flow:
        1. Fragment is started
@@ -53,10 +69,57 @@ public class MainFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
 
 //        mPhotoTaken = (ImageView) v.findViewById(R.id.photo_taken);
+        mGraphView = (GraphView) v.findViewById(R.id.graph);
         mTakePhotoButton = (Button) v.findViewById(R.id.take_photo_button);
         mLogOutButton = (Button) v.findViewById(R.id.log_out);
         mViewHistoryButton = (Button) v.findViewById(R.id.view_history);
         mPhotoFile = PhotoLab.get(getContext()).getPhotoFile();
+
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        mSeries = new LineGraphSeries<>(new DataPoint[]{
+                new DataPoint(0,0),
+                new DataPoint(1,0),
+                new DataPoint(2,0),
+                new DataPoint(3,0),
+                new DataPoint(4,0),
+                new DataPoint(5,0),
+                new DataPoint(6,0),
+                new DataPoint(7,0),
+                new DataPoint(8,0),
+                new DataPoint(9,0)
+        });
+
+        mGraphView.addSeries(mSeries);
+
+        Query graphData = mDatabase.child("users").child(mUser.getUid()).child("data-points");
+
+        graphData.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mGraphView.removeAllSeries();
+
+                DataPoint[] points = new DataPoint[(int)dataSnapshot.getChildrenCount()];
+
+                int i = 0;
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    FireBaseDataPoint point = snapshot.getValue(FireBaseDataPoint.class);
+                    points[i] = new DataPoint(i,(double)point.getHappiness()*100);
+                    i++;
+                }
+
+                mSeries = new LineGraphSeries<>(points);
+                mGraphView.addSeries(mSeries);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         PackageManager packageManager = getContext().getPackageManager();
 

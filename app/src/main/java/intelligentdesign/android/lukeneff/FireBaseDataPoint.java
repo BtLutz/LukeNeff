@@ -14,28 +14,37 @@ import java.util.Map;
 
 public class FireBaseDataPoint {
 
-    private String x;
-    private double y;
+    public float getHappiness() {
+        return happiness;
+    }
+
+    public Date getDate() {
+        Date d = new Date(date);
+        return d;
+    }
+
+    private long date;
+    private float happiness;
 
     public FireBaseDataPoint () {
         //For DataSnapshot
     }
 
-    public FireBaseDataPoint(double y) {
-        this.x = getDate();
-        this.y = y;
+    public FireBaseDataPoint(float happiness) {
+        this.date = generateDate();
+        this.happiness = happiness;
     }
 
-    private String getDate() {
+    private long generateDate() {
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
-        return now.toString();
+        return now.getTime();
     }
 
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-        result.put("x", x);
-        result.put("y", y);
+        result.put("date", date);
+        result.put("happiness", happiness);
 
         return result;
     }

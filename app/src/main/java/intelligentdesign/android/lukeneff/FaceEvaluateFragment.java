@@ -152,7 +152,7 @@ public class FaceEvaluateFragment extends Fragment {
             mTextView.setText(hold +String.valueOf(happiness));
 
             //Send new happiness data to Firebase
-            writeHappinessToDatabase((double)happiness);
+            writeHappinessToDatabase(happiness);
         }
         // Casting twice so that the parameter is right before we send it to the method.
         //writeHappinessToDatabase(Double.valueOf(String.valueOf(mTextView.getText())));
@@ -165,7 +165,7 @@ public class FaceEvaluateFragment extends Fragment {
         return v;
     }
 
-    private void writeHappinessToDatabase(double happiness) {
+    private void writeHappinessToDatabase(float happiness) {
         // Setup
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String key = mDatabaseReference.child("data-point").push().getKey();
