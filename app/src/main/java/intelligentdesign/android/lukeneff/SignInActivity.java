@@ -106,6 +106,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                         //hideProgressDialog();
 
                         if (task.isSuccessful()) {
+                            String username = usernameFromEmail(task.getResult().getUser().getEmail());
+                            writeNewUser(task.getResult().getUser().getUid(), username, task.getResult().getUser().getEmail());
                             onAuthSuccess(task.getResult().getUser());
                         } else {
                             Toast.makeText(SignInActivity.this, "Sign Up Failed",
@@ -116,11 +118,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void onAuthSuccess(FirebaseUser user) {
-        String username = usernameFromEmail(user.getEmail());
-
-        // Write new user
-        //writeNewUser(user.getUid(), username, user.getEmail());
-
         // Go to MainActivity
         startActivity(new Intent(SignInActivity.this, MainActivity.class));
         finish();
@@ -153,13 +150,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         return result;
     }
 
-    // [START basic_write]
     private void writeNewUser(String userId, String name, String email) {
         User user = new User(email);
 
         mDatabase.child("users").child(userId).setValue(user);
     }
-    // [END basic_write]
 
     @Override
     public void onClick(View v) {
