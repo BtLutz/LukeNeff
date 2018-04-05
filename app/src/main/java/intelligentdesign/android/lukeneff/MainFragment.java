@@ -172,7 +172,7 @@ public class MainFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_PHOTO) {
             Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
-            getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+           // getActivity().revokeUriPerission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 //            updatePhotoView();
             Intent i = new Intent(getContext(), FaceEvaluateActivity.class);
             i.putExtra(EXTRA_FILE_URI, uri);

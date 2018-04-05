@@ -1,5 +1,6 @@
 package intelligentdesign.android.lukeneff;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,7 +32,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private EditText mPasswordField;
     private Button mSignInButton;
     private Button mSignUpButton;
-
+    public Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +50,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         // Click listeners
         mSignInButton.setOnClickListener(this);
         mSignUpButton.setOnClickListener(this);
+        mContext=getApplicationContext();
     }
 
     @Override
@@ -165,4 +167,14 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             signUp();
         }
     }
+
+    public FirebaseAuth getmAuth(){
+
+        return mAuth;
+    }
+    public DatabaseReference getmDatabase(){
+
+        return mDatabase;
+    }
+
 }
