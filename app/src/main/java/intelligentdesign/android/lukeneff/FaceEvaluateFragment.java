@@ -171,7 +171,7 @@ public class FaceEvaluateFragment extends Fragment {
         String key = mDatabaseReference.child("data-point").push().getKey();
 
         // Building the new DataPoint object for FireBase
-        History fBDaFtaPoint = new History(happiness);
+        History fBDataPoint = new History(happiness);
         Map<String, Object> dataPointValues = fBDataPoint.toMap();
 
         // How we'll be putting stuff into the database. This object shows the path for where
