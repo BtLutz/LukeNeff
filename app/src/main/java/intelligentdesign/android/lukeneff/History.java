@@ -12,7 +12,7 @@ import java.util.Map;
  * Created by brianlutz on 3/27/18.
  */
 
-public class FireBaseDataPoint {
+public class History {
 
     public float getHappiness() {
         return happiness;
@@ -26,11 +26,11 @@ public class FireBaseDataPoint {
     private long date;
     private float happiness;
 
-    public FireBaseDataPoint () {
+    public History() {
         //For DataSnapshot
     }
 
-    public FireBaseDataPoint(float happiness) {
+    public History(float happiness) {
         this.date = generateDate();
         this.happiness = happiness;
     }

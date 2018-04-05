@@ -1,26 +1,19 @@
 package intelligentdesign.android.lukeneff;
 
-import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
-import android.graphics.Camera;
-import android.graphics.Picture;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,7 +27,6 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,39 +35,42 @@ import java.util.List;
 
 public class MainFragment extends Fragment {
 
+    // Intent request IDs
     private static final int REQUEST_PHOTO = 2;
     private static final int REQUEST_DETECTION = 3;
+
+    // Extras and FileProvider
     private static final String FILE_PROVIDER =
             "com.intelligentdesign.lukeneff.fileprovider";
     private static final String EXTRA_FILE_URI = "com.intelligentdesign.lukeneff.file_uri";
 
-//    private ImageView mPhotoTaken;
+    // Android UI/Layout stuff
     private Button mTakePhotoButton;
     private Button mLogOutButton;
     private Button mViewHistoryButton;
     private File mPhotoFile;
+
+    // Firebase stuff
     private DatabaseReference mDatabase;
     private FirebaseUser mUser;
+
+    // Android-Graph stuff
     private GraphView mGraphView;
     private LineGraphSeries<DataPoint> mSeries;
 
-    /* Control Flow:
-       1. Fragment is started
-       2. Fragment sends implicit intent to Camera
-       3.
-     */
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
 
-//        mPhotoTaken = (ImageView) v.findViewById(R.id.photo_taken);
+        // Finding Views
         mGraphView = (GraphView) v.findViewById(R.id.graph);
         mTakePhotoButton = (Button) v.findViewById(R.id.take_photo_button);
         mLogOutButton = (Button) v.findViewById(R.id.log_out);
         mViewHistoryButton = (Button) v.findViewById(R.id.view_history);
         mPhotoFile = PhotoLab.get(getContext()).getPhotoFile();
 
-
+        // Instantiating FireBase stuff
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -106,7 +101,7 @@ public class MainFragment extends Fragment {
                 int i = 0;
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    FireBaseDataPoint point = snapshot.getValue(FireBaseDataPoint.class);
+                    History point = snapshot.getValue(History.class);
                     points[i] = new DataPoint(i,(double)point.getHappiness()*100);
                     i++;
                 }
@@ -123,14 +118,15 @@ public class MainFragment extends Fragment {
 
         PackageManager packageManager = getContext().getPackageManager();
 
+        // Intent to start the camera. This doesn't change (ever), hence why it's final.
         final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
+        // Checking if we can get permissions to access both the camera and the file we store at
         boolean canTakePhoto = mPhotoFile != null &&
                 captureImage.resolveActivity(packageManager) != null;
         mTakePhotoButton.setEnabled(canTakePhoto);
 
-        /* Setting OnClickListeners */
-        // Take Photo Button
+        // Take Photo OnClickListener
         mTakePhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -149,6 +145,7 @@ public class MainFragment extends Fragment {
                 startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
+
         // Log Out Button
         mLogOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,27 +156,17 @@ public class MainFragment extends Fragment {
                 getActivity().finish();
             }
         });
+
         // View History Button
         mViewHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getContext(), GraphActivity.class);
+                Intent intent = new Intent(getContext(), HistoryListActivity.class);
                 startActivity(intent);
             }
         });
-
-//        updatePhotoView();
         return v;
     }
-
-//    public void updatePhotoView() {
-//        if (mPhotoTaken == null || !mPhotoFile.exists()) {
-//            // do nothing!
-//        } else {
-//            Bitmap bitmap = PictureUtilities.getScaledBitmap(mPhotoFile.getPath(), getActivity());
-//            mPhotoTaken.setImageBitmap(bitmap);
-//        }
-//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -187,7 +174,7 @@ public class MainFragment extends Fragment {
             Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
             getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 //            updatePhotoView();
-            Intent i = new Intent(getContext(), FaceEvaluateActivity.class); // Modify activity name here
+            Intent i = new Intent(getContext(), FaceEvaluateActivity.class);
             i.putExtra(EXTRA_FILE_URI, uri);
             startActivityForResult(i, REQUEST_DETECTION);
         }

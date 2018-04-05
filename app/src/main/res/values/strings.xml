@@ -3,6 +3,11 @@
     <string name="take_photo_button">Take Photo</string>
     <string name="log_out_text">log Out</string>
     <string name="view_history_text">View History</string>
+    <string name="history_date">Date</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="date_hint">Date</string>
+    <string name="score_hint">Score</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
