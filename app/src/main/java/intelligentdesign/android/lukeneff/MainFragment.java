@@ -69,13 +69,31 @@ public class MainFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Clearing the graph in the odd chance there was still data there
-        mGraphView.removeAllSeries();
+        // Jank code for initializing a graph when a user has no data.
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[]{
+                new DataPoint(0,0),
+                new DataPoint(1,0),
+                new DataPoint(2,0),
+                new DataPoint(3,0),
+                new DataPoint(4,0),
+                new DataPoint(5,0),
+                new DataPoint(6,0),
+                new DataPoint(7,0),
+                new DataPoint(8,0),
+                new DataPoint(9,0)
+        });
+
+        mGraphView.addSeries(series);
 
         // Grabbing histories from the HistoryLab object
         // and initializing a new object for data points.
         List<History> histories = HistoryLab.getInstance().getHistories();
         DataPoint[] dataPoints = new DataPoint[(int) histories.size()];
+
+        // Clearing the graph in the odd chance there was still data there
+        if (histories.size() > 0) {
+            mGraphView.removeAllSeries();
+        }
 
         // Looping through the data we got from our singleton to get it ready to plot on the graph.
         for (int i = 0; i < histories.size() - 1; i++) {
