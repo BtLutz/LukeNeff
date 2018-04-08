@@ -11,17 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.text.format.DateFormat.*;
@@ -36,10 +25,6 @@ public class HistoryListFragment extends Fragment {
     private RecyclerView mHistoryRecyclerView;
     private HistoryAdapter mHistoryAdapter;
 
-    // FireBase components
-    private DatabaseReference mDatabase;
-    private FirebaseUser mUser;
-
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
@@ -49,10 +34,6 @@ public class HistoryListFragment extends Fragment {
 
         mHistoryRecyclerView = (RecyclerView) v.findViewById(R.id.history_recycler_view);
         mHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        mUser = FirebaseAuth.getInstance().getCurrentUser();
-
         updateUI();
 
         return v;
@@ -60,30 +41,13 @@ public class HistoryListFragment extends Fragment {
     }
 
     private void updateUI() {
-        Query historyQuery = mDatabase.child("users").child(mUser.getUid()).child("data-points");
-
-        historyQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getChildrenCount() > 0) {
-                    List<History> histories = new ArrayList<>();
-
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        History history = snapshot.getValue(History.class);
-                        histories.add(history);
-                    }
-
-                    mHistoryAdapter = new HistoryAdapter(histories);
-                    mHistoryRecyclerView.setAdapter(mHistoryAdapter);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        List<History> histories = HistoryLab.getInstance().getHistories();
+        if (histories.size() > 0) {
+            mHistoryAdapter = new HistoryAdapter(histories);
+            mHistoryRecyclerView.setAdapter(mHistoryAdapter);
+        }
     }
+
     private class HistoryHolder extends RecyclerView.ViewHolder {
         private History mHistory;
         private TextView mHistoryDateTextView;

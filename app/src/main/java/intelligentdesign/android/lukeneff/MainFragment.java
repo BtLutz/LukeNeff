@@ -16,12 +16,8 @@ import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -50,13 +46,12 @@ public class MainFragment extends Fragment {
     private Button mViewHistoryButton;
     private File mPhotoFile;
 
-    // Firebase stuff
+    // FireBase stuff
     private DatabaseReference mDatabase;
     private FirebaseUser mUser;
 
     // Android-Graph stuff
     private GraphView mGraphView;
-    private LineGraphSeries<DataPoint> mSeries;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -74,48 +69,28 @@ public class MainFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        mSeries = new LineGraphSeries<>(new DataPoint[]{
-                new DataPoint(0,0),
-                new DataPoint(1,0),
-                new DataPoint(2,0),
-                new DataPoint(3,0),
-                new DataPoint(4,0),
-                new DataPoint(5,0),
-                new DataPoint(6,0),
-                new DataPoint(7,0),
-                new DataPoint(8,0),
-                new DataPoint(9,0)
-        });
+        // Clearing the graph in the odd chance there was still data there
+        mGraphView.removeAllSeries();
 
-        mGraphView.addSeries(mSeries);
+        // Grabbing histories from the HistoryLab object
+        // and initializing a new object for data points.
+        List<History> histories = HistoryLab.getInstance().getHistories();
+        DataPoint[] dataPoints = new DataPoint[(int) histories.size()];
 
-        Query graphData = mDatabase.child("users").child(mUser.getUid()).child("data-points");
+        // Looping through the data we got from our singleton to get it ready to plot on the graph.
+        for (int i = 0; i < histories.size() - 1; i++) {
+            History history = histories.get(i);
+            DataPoint dataPoint = new DataPoint(i, (double) history.getHappiness() * 100);
+            dataPoints[i] = dataPoint;
+        }
 
-        graphData.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mGraphView.removeAllSeries();
+        // Finally, plotting all of the data we got from our singleton object.
+        LineGraphSeries<DataPoint> dataPointSeries = new LineGraphSeries<>(dataPoints);
+        mGraphView.addSeries(dataPointSeries);
 
-                DataPoint[] points = new DataPoint[(int)dataSnapshot.getChildrenCount()];
-
-                int i = 0;
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    History point = snapshot.getValue(History.class);
-                    points[i] = new DataPoint(i,(double)point.getHappiness()*100);
-                    i++;
-                }
-
-                mSeries = new LineGraphSeries<>(points);
-                mGraphView.addSeries(mSeries);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
+        /* START OF THE CAMERA STUFF */
+        // I'm like 75% sure that the packageManager is the android OS API for saving files
+        // to and from local storage on the device, but please don't quote me on that.
         PackageManager packageManager = getContext().getPackageManager();
 
         // Intent to start the camera. This doesn't change (ever), hence why it's final.
@@ -145,12 +120,14 @@ public class MainFragment extends Fragment {
                 startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
+        /* END OF THE CAMERA STUFF */
 
         // Log Out Button
         mLogOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
+                HistoryLab.getInstance().deleteHistoriesAndDeinitialize();
                 Intent intent = new Intent(getContext(), SignInActivity.class);
                 startActivity(intent);
                 getActivity().finish();
@@ -172,8 +149,6 @@ public class MainFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_PHOTO) {
             Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
-           // getActivity().revokeUriPerission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-//            updatePhotoView();
             Intent i = new Intent(getContext(), FaceEvaluateActivity.class);
             i.putExtra(EXTRA_FILE_URI, uri);
             startActivityForResult(i, REQUEST_DETECTION);

@@ -23,14 +23,8 @@ import android.widget.TextView;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +55,6 @@ public class FaceEvaluateFragment extends Fragment {
     private Bitmap baseImage;
     private OnFragmentInteractionListener mListener;
     private TextView mTextView;
-    private DatabaseReference mDatabaseReference;
 
     public FaceEvaluateFragment() {
         // Required empty public constructor
@@ -101,7 +94,7 @@ public class FaceEvaluateFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_face_evaluate, container, false);
         mTextView = (TextView) v.findViewById(R.id.happy);
         mImageView = (ImageView) v.findViewById(R.id.imageView2);
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
         //pull the bitmap(uri) from the intent that started this activity
         Intent photoIntent = getActivity().getIntent();
         Uri uri = photoIntent.getParcelableExtra(EXTRA_FILE_URI);
@@ -151,8 +144,9 @@ public class FaceEvaluateFragment extends Fragment {
             String hold = "Happiness Level: ";
             mTextView.setText(hold +String.valueOf(happiness));
 
-            //Send new happiness data to Firebase
-            writeHappinessToDatabase(happiness);
+            // Create a new history point and add it to the History Singleton and FireBase
+            History history = new History(happiness);
+            HistoryLab.getInstance().addHistory(history);
         }
         // Casting twice so that the parameter is right before we send it to the method.
         //writeHappinessToDatabase(Double.valueOf(String.valueOf(mTextView.getText())));
@@ -165,22 +159,22 @@ public class FaceEvaluateFragment extends Fragment {
         return v;
     }
 
-    private void writeHappinessToDatabase(float happiness) {
-        // Setup
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String key = mDatabaseReference.child("data-point").push().getKey();
-
-        // Building the new DataPoint object for FireBase
-        History fBDataPoint = new History(happiness);
-        Map<String, Object> dataPointValues = fBDataPoint.toMap();
-
-        // How we'll be putting stuff into the database. This object shows the path for where
-        // our new object should be inserted.
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/users/" + user.getUid() + "/data-points/" + key, dataPointValues);
-        mDatabaseReference.updateChildren(childUpdates);
-
-    }
+//    private void writeHappinessToDatabase(float happiness) {
+//        // Setup
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String key = mDatabaseReference.child("data-point").push().getKey();
+//
+//        // Building the new DataPoint object for FireBase
+//        History fBDataPoint = new History(happiness);
+//        Map<String, Object> dataPointValues = fBDataPoint.toMap();
+//
+//        // How we'll be putting stuff into the database. This object shows the path for where
+//        // our new object should be inserted.
+//        Map<String, Object> childUpdates = new HashMap<>();
+//        childUpdates.put("/users/" + user.getUid() + "/data-points/" + key, dataPointValues);
+//        mDatabaseReference.updateChildren(childUpdates);
+//
+//    }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
