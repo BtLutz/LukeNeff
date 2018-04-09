@@ -46,26 +46,6 @@ public class HistoryLab {
 
         // List initialization
         mHistories = new ArrayList<>();
-
-        // Querying data to populate singleton
-        Query graphData = mDatabase.child("users").child(mUser.getUid()).child("data-points");
-
-        // Executing on returned query data. This add the History Snapshots to the singleton's list
-        // and synchronize with what we have residing on FireBase.
-        graphData.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    History history = snapshot.getValue(History.class);
-                    mHistories.add(history);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     /**
@@ -84,6 +64,34 @@ public class HistoryLab {
         return mHistories;
     }
 
+    public void getHistoriesAsynchronously(final MainFragment mainFragment) {
+        if (mHistories.size() > 0) {
+            // Assuming that if its size is greater than zero, it's up to date with the remote DB.
+            mainFragment.updateGraph(mHistories);
+        } else {
+            // Querying data to populate singleton
+            Query graphData = mDatabase.child("users").child(mUser.getUid()).child("data-points");
+
+            // Executing on returned query data. This add the History Snapshots to the singleton's list
+            // and synchronize with what we have residing on FireBase.
+            graphData.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        History history = snapshot.getValue(History.class);
+                        mHistories.add(history);
+                    }
+                    mainFragment.updateGraph(mHistories);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+        }
+    }
     /**
      * Adds a given History object to the remote FireBase database and the local mHistories copy.
      * @param history the history to be added to both local and cloud stores.

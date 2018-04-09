@@ -97,9 +97,16 @@ public class MainFragment extends Fragment {
 
         mGraphView.addSeries(series);
 
-        // Grabbing histories from the HistoryLab object
-        // and initializing a new object for data points.
-        List<History> histories = HistoryLab.getInstance().getHistories();
+        HistoryLab.getInstance().getHistoriesAsynchronously(this);
+
+        // Initialize the camera stuff
+        initializeCameraIntentAndListener();
+        initializeHistoryAndLogOutListeners();
+
+        return v;
+    }
+
+    public void updateGraph(List<History> histories) {
         DataPoint[] dataPoints = new DataPoint[(int) histories.size()];
 
         // Clearing the graph in the odd chance there was still data there
@@ -108,7 +115,7 @@ public class MainFragment extends Fragment {
         }
 
         // Looping through the data we got from our singleton to get it ready to plot on the graph.
-        for (int i = 0; i < histories.size() - 1; i++) {
+        for (int i = 0; i < histories.size(); i++) {
             History history = histories.get(i);
             DataPoint dataPoint = new DataPoint(i, (double) history.getHappiness() * 100);
             dataPoints[i] = dataPoint;
@@ -117,8 +124,19 @@ public class MainFragment extends Fragment {
         // Finally, plotting all of the data we got from our singleton object.
         LineGraphSeries<DataPoint> dataPointSeries = new LineGraphSeries<>(dataPoints);
         mGraphView.addSeries(dataPointSeries);
+    }
 
-        /* START OF THE CAMERA STUFF */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_PHOTO) {
+            Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
+            Intent i = new Intent(getContext(), FaceEvaluateActivity.class);
+            i.putExtra(EXTRA_FILE_URI, uri);
+            startActivityForResult(i, REQUEST_DETECTION);
+        }
+    }
+
+    private void initializeCameraIntentAndListener() {
         // I'm like 75% sure that the packageManager is the android OS API for saving files
         // to and from local storage on the device, but please don't quote me on that.
         PackageManager packageManager = getContext().getPackageManager();
@@ -150,14 +168,16 @@ public class MainFragment extends Fragment {
                 startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
-        /* END OF THE CAMERA STUFF */
+    }
 
+    private void initializeHistoryAndLogOutListeners() {
         // Log Out Button
         mLogOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
                 HistoryLab.getInstance().deleteHistoriesAndDeinitialize();
+                mGraphView.removeAllSeries();
                 Intent intent = new Intent(getContext(), SignInActivity.class);
                 startActivity(intent);
                 getActivity().finish();
@@ -172,16 +192,5 @@ public class MainFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        return v;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_PHOTO) {
-            Uri uri = FileProvider.getUriForFile(getActivity(), FILE_PROVIDER, mPhotoFile);
-            Intent i = new Intent(getContext(), FaceEvaluateActivity.class);
-            i.putExtra(EXTRA_FILE_URI, uri);
-            startActivityForResult(i, REQUEST_DETECTION);
-        }
     }
 }
