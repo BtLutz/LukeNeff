@@ -3,6 +3,7 @@ package intelligentdesign.android.lukeneff;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import java.text.NumberFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -18,7 +19,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -82,6 +85,15 @@ public class MainFragment extends Fragment {
                 new DataPoint(8,0),
                 new DataPoint(9,0)
         });
+
+        // Format graph x and y axis values
+        NumberFormat nf = NumberFormat.getInstance();
+        nf.setMinimumIntegerDigits(0);
+        mGraphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter(nf,nf));
+
+        // Add padding for axis numbers
+        GridLabelRenderer glr = mGraphView.getGridLabelRenderer();
+        glr.setPadding(32); // should allow for 3 digits to fit on screen
 
         mGraphView.addSeries(series);
 
