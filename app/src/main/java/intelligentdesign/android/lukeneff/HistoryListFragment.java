@@ -58,7 +58,9 @@ public class HistoryListFragment extends Fragment {
         return v;
 
     }
-
+    public HistoryAdapter getHistoryAdapter(){
+        return mHistoryAdapter;
+    }
     private void updateUI() {
         Query historyQuery = mDatabase.child("users").child(mUser.getUid()).child("data-points");
 
@@ -110,7 +112,7 @@ public class HistoryListFragment extends Fragment {
         }
     }
 
-    private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
+    public class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
 
         private List<History> mHistories;
 

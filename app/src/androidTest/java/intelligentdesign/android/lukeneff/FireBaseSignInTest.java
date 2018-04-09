@@ -45,13 +45,40 @@ public class FireBaseSignInTest extends ActivityUnitTestCase {
         super(SignInActivity.class);
     }
     @Test
-    public void testHello(){
+    public void testSignIn(){
         String email = "foo@bar.com";
         String password = "foobar";
 
 
         SignInActivity signInTest = rule.getActivity();
         signInTest.getmAuth().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(signInTest, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        String result  = "Fail";
+                        Log.d(TAG, "signIn:onComplete:" + task.isSuccessful());
+                        //hideProgressDialog();
+
+                        if (task.isSuccessful()) {
+                            result = "Success";
+                            Log.d(TAG,"Success");
+                        } else {
+                            Log.d(TAG,"Fail");
+                        }
+                        assertEquals("Success", result);
+                    }
+                });
+
+    }
+
+    @Test
+    public void testSignUp(){
+        String email = "place@bar.com";
+        String password = "foobar";
+
+
+        SignInActivity signInTest = rule.getActivity();
+        signInTest.getmAuth().createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(signInTest, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
