@@ -11,7 +11,6 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="350dip"
-        android:padding="3dip"
         android:background="@drawable/background_shadow">
 
         <com.jjoe64.graphview.GraphView
@@ -28,19 +27,28 @@
         <Button
             android:id="@+id/take_photo_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/take_photo_button" />
+            android:layout_height="75dp"
+            android:text="@string/take_photo_button"
+            android:background="@drawable/rounded_button"
+            android:textColor="#ffffff"
+            android:layout_margin="2dp"/>
 
         <Button
             android:id="@+id/view_history"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/view_history_text" />
+            android:layout_height="75dp"
+            android:text="@string/view_history_text"
+            android:background="@drawable/rounded_button"
+            android:textColor="#ffffff"
+            android:layout_margin="2dp"/>
 
         <Button
             android:id="@+id/log_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/log_out_text"/>
+            android:text="@string/log_out_text"
+            android:background="@drawable/rounded_button_red"
+            android:textColor="#ffffff"
+            android:layout_margin="2dp"/>
     </LinearLayout>
 </LinearLayout>
